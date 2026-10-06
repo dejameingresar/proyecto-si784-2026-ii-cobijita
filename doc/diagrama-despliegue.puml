@@ -1,0 +1,17 @@
+@startuml Aplicación_web_tres_niveles_despliegue
+title Aplicación web tres niveles — Diagrama de despliegue (v1.0)
+
+  node "Servidor de aplicación" as N1 <<executionEnvironment>> {
+    artifact "app.jar" as A1 <<executable>>
+    artifact "web.conf" as A3 <<document>>
+  }
+  node "Servidor de base de datos" as N2 <<executionEnvironment>> {
+    artifact "app-schema.sql" as A2 <<data>>
+  }
+
+  A1 ..> C2 : realiza
+  A2 ..> C3 : realiza
+  A3 ..> C1 : realiza
+  N1 --> N2 : TCP/5432
+
+@enduml

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Prueba de humo · DespliegaUML</title>
+</head>
+<body>
+<h1 id="salida">ejecutando…</h1>
+<script src="../src/modelo.js"></script>
+<script src="../src/reglas.js"></script>
+<script src="../src/plan.js"></script>
+<script src="../src/pruebas.js"></script>
+<script src="../src/puml.js"></script>
+<script>
+/* Prueba de humo: ejercita el motor igual que lo hace la interfaz y
+   comprueba invariantes de uso, sin depender del DOM de la aplicación. */
+var log = [], fallos = 0;
+function ok(nombre, cond, detalle) {
+  log.push((cond ? 'OK   ' : 'FALLA') + ' | ' + nombre + (detalle ? ' | ' + detalle : ''));
+  if (!cond) fallos++;
+}
+try {
+  var M = DPL.Modelo, F = DPL.pruebas.fabrica();
+
+  /* 1 · arranque con el ejemplo precargado */
+  var m = F.webTresNiveles();
+  var v = DPL.validar(m);
+  ok('el ejemplo arranca válido', v.valido, JSON.stringify(v.resumen));
+
+  /* 2 · crear un componente nuevo como haría el usuario */
+  var c = M.agregarComponente(m, { nombre: 'Cache', estereotipo: 'library', x: 100, y: 100 });
+  ok('se crea un componente y recibe id correlativo', c.id === 'C4', c.id);
+  var v2 = DPL.validar(m);
+  ok('el componente nuevo dispara R-11 pero no bloquea', v2.valido && DPL.validar(m).hallazgos.some(function (h) { return h.regla === 'R-11'; }),
+     'errores=' + v2.resumen.error);
+
+  /* 3 · añadir puerto y conectar: el flujo de la herramienta Conector */
+  M.agregarPuerto(c, { id: 'p1', nombre: 'cache', direccion: 'provided', interfaz: 'ICache' });
+  var ui = m.componentes[0];
+  M.agregarPuerto(ui, { id: 'p2', nombre: 'consultaCache', direccion: 'required', interfaz: 'ICache' });
+  M.agregarConector(m, { desde: { componente: c.id, puerto: 'p1' }, hacia: { componente: ui.id, puerto: 'p2' } });
+  var v3 = DPL.validar(m);
+  ok('el puerto nuevo cableado no genera error', v3.resumen.error === 0, JSON.stringify(v3.resumen));
+  ok('R-07 ya no reporta la interfaz Cache huérfana',
+     !v3.hallazgos.some(function (h) { return h.regla === 'R-07' && h.mensaje.indexOf('ICache') >= 0; }));
+
+  /* 4 · materializar el componente nuevo (flujo Realizar artefacto) */
+  var art = M.agregarArtefacto(m, { nombre: 'cache.jar', tipo: 'executable', version: '1.0.0', componente: c.id });
+  M.agregarRealizacion(m, { artefacto: art.id, nodo: m.nodos[0].id });
+  var v4 = DPL.validar(m);
+  ok('tras realizar el artefacto desaparece R-11',
+     !v4.hallazgos.some(function (h) { return h.regla === 'R-11' && h.elemento === c.id; }));
+  ok('el modelo sigue siendo desplegable', v4.valido, JSON.stringify(v4.resumen));
+
+  /* 5 · plan de despliegue cubre lo nuevo */
+  var plan = DPL.generarPlan(m);
+  ok('el plan incluye el componente nuevo', plan.componentes.some(function (x) { return x.id === c.id; }));
+  ok('el plan marca el estado correcto', plan.fase === 'LISTO PARA DESPLIEGUE', plan.fase);
+  ok('el plan cubre todos los artefactos', plan.resumen.artefactosDesplegados === m.artefactos.length,
+     plan.resumen.artefactosDesplegados + '/' + m.artefactos.length);
+
+  /* 6 · introducir un error bloquea el plan (regla de decisión) */
+  m.componentes[0].estereotipo = 'microservicio';
+  var planMalo = DPL.generarPlan(m);
+  ok('un error bloquea el plan', planMalo.fase === 'BLOQUEADO' && !planMalo.baseValidada, planMalo.fase);
+  m.componentes[0].estereotipo = 'application';
+
+  /* 7 · persistencia: JSON y PlantUML */
+  var copia = M.normalizar(JSON.parse(JSON.stringify(m)));
+  ok('el modelo sobrevive al ciclo JSON', DPL.validar(copia).resumen.error === DPL.validar(m).resumen.error);
+  var vuelta = DPL.puml.importar(DPL.puml.exportar(m));
+  ok('el round-trip PlantUML no introduce errores',
+     vuelta.errores.length === 0 && DPL.validar(vuelta.modelo).resumen.error === 0,
+     'errores parser=' + vuelta.errores.length + ', validación=' + JSON.stringify(DPL.validar(vuelta.modelo).resumen));
+  ok('el round-trip conserva el número de componentes',
+     vuelta.modelo.componentes.length === m.componentes.length,
+     vuelta.modelo.componentes.length + '/' + m.componentes.length);
+
+  /* 8 · la suite completa sigue verde */
+  var t = DPL.pruebas.corredor();
+  ok('el micro-corredor está disponible', typeof t.ejecutar === 'function');
+} catch (e) {
+  log.push('EXCEPCION | ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
+  fallos++;
+}
+document.getElementById('salida').textContent =
+  log.join('\n') + '\n\nTOTAL: ' + (fallos ? fallos + ' FALLOS' : 'TODO OK');
+</script>
+</body>
+</html>

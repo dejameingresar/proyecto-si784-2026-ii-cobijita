@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DespliegaUML · Diagramador de componentes y despliegue de software</title>
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<header class="barra">
+  <div class="marca">
+    <span class="logo">▲</span>
+    <div>
+      <h1>DespliegaUML</h1>
+      <p>Diagramador de componentes y despliegue con validación de reglas y plan de despliegue</p>
+    </div>
+  </div>
+  <div class="acciones">
+    <input id="nombre-proyecto" type="text" value="Aplicación web tres niveles" aria-label="Nombre del proyecto">
+    <button id="btn-nuevo" class="sec">Nuevo</button>
+    <button id="btn-ejemplo" class="sec">Cargar ejemplo</button>
+    <button id="btn-importar" class="sec">Importar JSON</button>
+    <button id="btn-exportar" class="sec">Exportar JSON</button>
+    <button id="btn-importar-puml" class="sec">Importar .puml</button>
+    <button id="btn-exportar-puml" class="sec">Exportar .puml</button>
+    <button id="btn-plan" class="pri">Generar plan de despliegue</button>
+  </div>
+</header>
+
+<nav class="pestanas">
+  <button class="pest activa" data-vista="componentes">Diagrama de componentes</button>
+  <button class="pest" data-vista="despliegue">Diagrama de despliegue</button>
+  <button class="pest" data-vista="reglas">Reglas de consistencia</button>
+  <button class="pest" data-vista="plan">Plan de despliegue</button>
+</nav>
+
+<main>
+
+  <!-- ============ LIENZO ============ -->
+  <section class="panel lienzo">
+    <div class="panel-cab">
+      <h2 id="titulo-vista">Diagrama de componentes</h2>
+      <div class="herramientas" id="herramientas"></div>
+    </div>
+    <div class="lienzo-envoltura">
+      <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="panel-texto" class="panel-texto oculto"></div>
+      <p class="pista oculto" id="pista">Selecciona una herramienta o haz clic en un elemento para editarlo.</p>
+    </div>
+  </section>
+
+  <!-- ============ INSPECTOR ============ -->
+  <aside class="panel lateral">
+    <div class="panel-cab"><h2>Inspector</h2></div>
+    <div id="inspector" class="cuerpo">
+      <p class="vacio">Ningún elemento seleccionado.</p>
+    </div>
+
+    <div class="panel-cab"><h2>Validación</h2></div>
+    <div id="resumen-validacion" class="resumen"></div>
+    <div id="lista-hallazgos" class="hallazgos"></div>
+  </aside>
+</main>
+
+<!-- ============ DIÁLOGO DE PLAN ============ -->
+<div id="modal" class="modal oculto">
+  <div class="modal-caja">
+    <div class="modal-cab">
+      <h2>Plan de despliegue</h2>
+      <div>
+        <button id="btn-copiar-plan" class="sec">Copiar Markdown</button>
+        <button id="btn-descargar-plan" class="sec">Descargar .md</button>
+        <button id="btn-cerrar-modal" class="sec">Cerrar</button>
+      </div>
+    </div>
+    <pre id="salida-plan"></pre>
+  </div>
+</div>
+
+<input type="file" id="archivo-entrada" accept=".json,.puml" hidden>
+
+<script src="src/modelo.js"></script>
+<script src="src/reglas.js"></script>
+<script src="src/plan.js"></script>
+<script src="src/pruebas.js"></script>
+<script src="src/vista.js"></script>
+<script src="src/puml.js"></script>
+<script src="src/almacen.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>

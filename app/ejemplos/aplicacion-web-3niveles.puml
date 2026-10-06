@@ -1,0 +1,40 @@
+@startuml Aplicación_web_tres_niveles
+skinparam componentStyle rectangle
+title Aplicación web tres niveles v1.0
+' @meta proyecto = Aplicación web tres niveles | version = 1.0
+
+package "Diagrama de componentes" {
+  component "Servidor web" as C1 <<application>> {
+    .. "p1 peticion" : INegocio
+  }
+  component "Lógica de negocio" as C2 <<service>> {
+    -- "p1 operacion" : INegocio
+    .. "p2 consulta" : IPersistencia
+  }
+  database "Base de datos" as C3 <<database>> {
+    -- "p1 acceso" : IPersistencia
+  }
+  C2 "p1" --> C1 "p1" : uses
+  C3 "p1" --> C2 "p2" : uses
+}
+
+package "Diagrama de despliegue" {
+  node "Servidor de aplicación" as N1 <<executionEnvironment>> {
+' @spec N1 so=Debian 13 ; cpu=4 vCPU ; mem=8 GB
+    artifact "app.jar" as A1 <<executable>>
+' @file A1 dist/app.jar ; version=2.1.0
+    artifact "web.conf" as A3 <<document>>
+' @file A3 conf/web.conf ; version=1.0.0
+  }
+  node "Servidor de base de datos" as N2 <<executionEnvironment>> {
+' @spec N2 so=PostgreSQL 17 ; cpu=8 vCPU ; mem=32 GB
+    artifact "app-schema.sql" as A2 <<data>>
+' @file A2 db/schema.sql ; version=1.4.0
+  }
+  A1 ..> C2 : realiza
+  A2 ..> C3 : realiza
+  A3 ..> C1 : realiza
+  N1 --> N2 : TCP/5432
+}
+
+@enduml

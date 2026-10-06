@@ -1,0 +1,183 @@
+{
+  "nombre": "Aplicación web tres niveles",
+  "version": "1.0",
+  "componentes": [
+    {
+      "id": "C1",
+      "nombre": "Servidor web",
+      "estereotipo": "application",
+      "descripcion": "",
+      "puertos": [
+        {
+          "id": "p1",
+          "nombre": "peticion",
+          "direccion": "required",
+          "interfaz": "INegocio"
+        }
+      ],
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "C2",
+      "nombre": "Lógica de negocio",
+      "estereotipo": "service",
+      "descripcion": "",
+      "puertos": [
+        {
+          "id": "p1",
+          "nombre": "operacion",
+          "direccion": "provided",
+          "interfaz": "INegocio"
+        },
+        {
+          "id": "p2",
+          "nombre": "consulta",
+          "direccion": "required",
+          "interfaz": "IPersistencia"
+        }
+      ],
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "C3",
+      "nombre": "Base de datos",
+      "estereotipo": "database",
+      "descripcion": "",
+      "puertos": [
+        {
+          "id": "p1",
+          "nombre": "acceso",
+          "direccion": "provided",
+          "interfaz": "IPersistencia"
+        }
+      ],
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "conectores": [
+    {
+      "id": "K1",
+      "desde": {
+        "componente": "C2",
+        "puerto": "p1"
+      },
+      "hacia": {
+        "componente": "C1",
+        "puerto": "p1"
+      },
+      "contrato": "uses",
+      "etiqueta": ""
+    },
+    {
+      "id": "K2",
+      "desde": {
+        "componente": "C3",
+        "puerto": "p1"
+      },
+      "hacia": {
+        "componente": "C2",
+        "puerto": "p2"
+      },
+      "contrato": "uses",
+      "etiqueta": ""
+    }
+  ],
+  "nodos": [
+    {
+      "id": "N1",
+      "nombre": "Servidor de aplicación",
+      "estereotipo": "executionEnvironment",
+      "anfitrion": null,
+      "sistemaOperativo": "Debian 13",
+      "cpu": "4 vCPU",
+      "memoria": "8 GB",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "N2",
+      "nombre": "Servidor de base de datos",
+      "estereotipo": "executionEnvironment",
+      "anfitrion": null,
+      "sistemaOperativo": "PostgreSQL 17",
+      "cpu": "8 vCPU",
+      "memoria": "32 GB",
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "artefactos": [
+    {
+      "id": "A1",
+      "nombre": "app.jar",
+      "tipo": "executable",
+      "archivo": "dist/app.jar",
+      "version": "2.1.0",
+      "componente": "C2",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "A2",
+      "nombre": "app-schema.sql",
+      "tipo": "data",
+      "archivo": "db/schema.sql",
+      "version": "1.4.0",
+      "componente": "C3",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "A3",
+      "nombre": "web.conf",
+      "tipo": "document",
+      "archivo": "conf/web.conf",
+      "version": "1.0.0",
+      "componente": "C1",
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "realizaciones": [
+    {
+      "id": "R1",
+      "artefacto": "A1",
+      "nodo": "N1",
+      "ruta": "",
+      "orden": 1
+    },
+    {
+      "id": "R2",
+      "artefacto": "A2",
+      "nodo": "N2",
+      "ruta": "",
+      "orden": 1
+    },
+    {
+      "id": "R3",
+      "artefacto": "A3",
+      "nodo": "N1",
+      "ruta": "",
+      "orden": 1
+    }
+  ],
+  "caminos": [
+    {
+      "id": "CP1",
+      "a": "N1",
+      "b": "N2",
+      "protocolo": "TCP",
+      "puerto": 5432
+    }
+  ],
+  "_seq": {
+    "C": 3,
+    "K": 2,
+    "N": 2,
+    "A": 3,
+    "R": 3
+  }
+}

@@ -1,0 +1,28 @@
+@startuml Aplicación_web_tres_niveles_componentes
+skinparam componentStyle rectangle
+title Aplicación web tres niveles — Diagrama de componentes (v1.0)
+
+  component "Servidor web" as C1 <<application>> {
+    port p1_peticion
+  }
+  component "Lógica de negocio" as C2 <<service>> {
+    port p1_operacion
+    port p2_consulta
+  }
+  interface "INegocio" as C2_P1_IF
+  database "Base de datos" as C3 <<database>> {
+    port p1_acceso
+  }
+  interface "IPersistencia" as C3_P1_IF
+
+  C2 --> C1 : uses
+  C3 --> C2 : uses
+
+legend top left
+|= Componente |= Interfaz publicada |= Interfaz requerida |
+| C1 Servidor web | — | peticion : INegocio |
+| C2 Lógica de negocio | operacion : INegocio | consulta : IPersistencia |
+| C3 Base de datos | acceso : IPersistencia | — |
+endlegend
+
+@enduml
